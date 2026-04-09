@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="system">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HVAC Pro — Sistema de Gestão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 22V12h6v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-name">HVAC Pro</div>
+        <div class="logo-sub">Sistema de Gestão</div>
+      </div>
+    </div>
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="Recolher menu">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-section-label">Visão Geral</div>
+    <a class="nav-link active" onclick="showPage('dashboard')" data-page="dashboard">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a class="nav-link" onclick="showPage('agenda')" data-page="agenda">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>Agenda</span>
+    </a>
+
+    <div class="nav-section-label">Estoque</div>
+    <a class="nav-link" onclick="showPage('materiais')" data-page="materiais">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Materiais</span>
+    </a>
+    <a class="nav-link" onclick="showPage('maquinas')" data-page="maquinas">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 7V5a2 2 0 012-2h6a2 2 0 012 2v2" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="14" r="2" stroke="currentColor" stroke-width="1.5"/></svg>
+      <span>Equipamentos</span>
+    </a>
+    <a class="nav-link" onclick="showPage('ferramentas')" data-page="ferramentas">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Ferramentas</span>
+    </a>
+
+    <div class="nav-section-label">Pessoas</div>
+    <a class="nav-link" onclick="showPage('tecnicos')" data-page="tecnicos">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M4 20a8 8 0 0116 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>Técnicos</span>
+    </a>
+    <a class="nav-link" onclick="showPage('clientes')" data-page="clientes">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>Clientes</span>
+    </a>
+    <a class="nav-link" onclick="showPage('alocacoes')" data-page="alocacoes">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>Alocações</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="theme-switcher">
+      <button class="theme-btn active" data-theme="light" onclick="setTheme('light')" title="Tema claro">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')" title="Tema escuro">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="theme-btn" data-theme="system" onclick="setTheme('system')" title="Seguir sistema">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar">GE</div>
+      <div class="user-info">
+        <div class="user-name">Gestor</div>
+        <div class="user-role">Administrador</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-btn" onclick="toggleSidebar()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="breadcrumb" id="breadcrumb">Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="text" placeholder="Buscar..." id="globalSearch" oninput="handleGlobalSearch(this.value)">
+      </div>
+      <div class="notif-btn" id="alertBadge" onclick="showPage('materiais')" title="Itens com estoque baixo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="badge-dot" id="alertDot"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="content" id="content">
+
+    <!-- ==================== DASHBOARD ==================== -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-hero">
+        <div>
+          <h1 class="page-title">Visão Geral</h1>
+          <p class="page-sub">Hoje, <span id="todayDate"></span></p>
+        </div>
+      </div>
+
+      <div class="kpi-grid" id="dashKpis"></div>
+
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-head">
+            <h3 class="card-title">Movimentação recente</h3>
+            <span class="card-badge">Últimas 10</span>
+          </div>
+          <div class="movim-list" id="dashMovim"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3 class="card-title">Instalações de hoje</h3>
+            <span class="tag-gcal">
+              <svg width="11" height="11" viewBox="0 0 18 18" fill="none"><rect x="1" y="3" width="16" height="13" rx="2" fill="#4285F4"/><rect x="1" y="6" width="16" height="12" rx="0" fill="#fff"/><rect x="6" y="10" width="6" height="5" rx="1" fill="#4285F4"/></svg>
+              Google Agenda
+            </span>
+          </div>
+          <div id="dashAgenda"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1rem">
+        <div class="card-head">
+          <h3 class="card-title">Alertas de estoque</h3>
+        </div>
+        <div id="dashAlerts"></div>
+      </div>
+    </div>
+
+    <!-- ==================== AGENDA ==================== -->
+    <div id="page-agenda" class="page">
+      <div class="page-hero">
+        <div><h1 class="page-title">Agenda de Instalações</h1><p class="page-sub">Integração com Google Agenda</p></div>
+        <div class="hero-actions">
+          <button class="btn btn-outline" onclick="exportData('agenda','xlsx')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Exportar
+          </button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:1rem;border:1.5px dashed var(--border)">
+        <div style="display:flex;align-items:center;gap:16px;padding:8px 0">
+          <div style="width:40px;height:40px;background:#E8F0FE;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><rect x="1" y="3" width="16" height="13" rx="2" fill="#4285F4"/><rect x="1" y="6" width="16" height="10" fill="#fff" opacity=".95"/><rect x="6" y="10" width="6" height="5" rx="1" fill="#4285F4"/></svg>
+          </div>
+          <div style="flex:1">
+            <div class="fw-500" style="font-size:14px">Conectar Google Agenda</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Sincronize eventos para controle automático de materiais necessários por instalação</div>
+          </div>
+          <button class="btn btn-primary" style="white-space:nowrap;flex-shrink:0">Conectar conta Google</button>
+        </div>
+      </div>
+      <div id="agendaList"></div>
+    </div>
+
+    <!-- ==================== MATERIAIS ==================== -->
+    <div id="page-materiais" class="page">
+      <div class="page-hero">
+        <div><h1 class="page-title">Materiais</h1><p class="page-sub" id="materiaisCount"></p></div>
+        <div class="hero-actions">
+          <div class="export-group">
+            <button class="btn btn-outline" onclick="exportData('materiais','xlsx')">Excel</button>
+            <button class="btn btn-outline" onclick="exportData('materiais','pdf')">PDF</button>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-material')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+            Novo material
+          </button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input class="filter-input" type="text" placeholder="Buscar material..." oninput="renderTable('materiais')">
+        <select class="filter-select" onchange="renderTable('materiais')">
+          <option value="">Todas as categorias</option>
+          <option>Filtros</option><option>Refrigerante</option><option>Elétrico</option>
+          <option>Hidráulico</option><option>Fixação</option><option>Outros</option>
+        </select>
+        <select class="filter-select" onchange="renderTable('materiais')">
+          <option value="">Todos os status</option>
+          <option value="ok">OK</option><option value="low">Estoque baixo</option><option value="out">Sem estoque</option>
+        </select>
+      </div>
+      <div class="card table-card">
+        <table class="data-table" id="tbl-materiais">
+          <thead><tr>
+            <th>Material</th><th>Categoria</th><th>Qtd</th><th>Mínimo</th>
+            <th>Unidade</th><th>Status</th><th class="actions-col">Ações</th>
+          </tr></thead>
+          <tbody id="tbody-materiais"></tbody>
+        </table>
+        <div class="table-empty" id="empty-materiais" style="display:none">Nenhum material encontrado.</div>
+      </div>
+    </div>
+
+    <!-- ==================== EQUIPAMENTOS ==================== -->
+    <div id="page-maquinas" class="page">
+      <div class="page-hero">
+        <div><h1 class="page-title">Equipamentos</h1><p class="page-sub" id="maquinasCount"></p></div>
+        <div class="hero-actions">
+          <div class="export-group">
+            <button class="btn btn-outline" onclick="exportData('maquinas','xlsx')">Excel</button>
+            <button class="btn btn-outline" onclick="exportData('maquinas','pdf')">PDF</button>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-maquina')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+            Novo equipamento
+          </button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input class="filter-input" type="text" placeholder="Buscar por modelo, marca, série..." oninput="renderTable('maquinas')">
+        <select class="filter-select" onchange="renderTable('maquinas')">
+          <option value="">Todos os status</option>
+          <option value="Estoque">Em estoque</option>
+          <option value="Alocado">Alocado</option>
+          <option value="Manutenção">Em manutenção</option>
+        </select>
+      </div>
+      <div class="card table-card">
+        <table class="data-table" id="tbl-maquinas">
+          <thead><tr>
+            <th>Modelo</th><th>Marca</th><th>BTUs</th><th>Nº Série</th>
+            <th>Patrimônio</th><th>Status</th><th>Alocado a</th><th class="actions-col">Ações</th>
+          </tr></thead>
+          <tbody id="tbody-maquinas"></tbody>
+        </table>
+        <div class="table-empty" id="empty-maquinas" style="display:none">Nenhum equipamento encontrado.</div>
+      </div>
+    </div>
+
+    <!-- ==================== FERRAMENTAS ==================== -->
+    <div id="page-ferramentas" class="page">
+      <div class="page-hero">
+        <div><h1 class="page-title">Ferramentas</h1><p class="page-sub" id="ferramentasCount"></p></div>
+        <div class="hero-actions">
+          <div class="export-group">
+            <button class="btn btn-outline" onclick="exportData('ferramentas','xlsx')">Excel</button>
+            <button class="btn btn-outline" onclick="exportData('ferramentas','pdf')">PDF</button>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-ferramenta')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+            Nova ferramenta
+          </button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input class="filter-input" type="text" placeholder="Buscar ferramenta..." oninput="renderTable('ferramentas')">
+      </div>
+      <div class="card table-card">
+        <table class="data-table" id="tbl-ferramentas">
+          <thead><tr>
+            <th>Ferramenta</th><th>Qtd Total</th><th>Disponível</th>
+            <th>Com técnico</th><th>Manutenção</th><th>Patrimônio</th><th class="actions-col">Ações</th>
+          </tr></thead>
+          <tbody id="tbody-ferramentas"></tbody>
+        </table>
+        <div class="table-empty" id="empty-ferramentas" style="display:none">Nenhuma ferramenta encontrada.</div>
+      </div>
+    </div>
+
+    <!-- ==================== TÉCNICOS ==================== -->
+    <div id="page-tecnicos" class="page">
+      <div class="page-hero">
+        <div><h1 class="page-title">Técnicos</h1><p class="page-sub" id="tecnicosCount"></p></div>
+        <div class="hero-actions">
+          <div class="export-group">
+            <button class="btn btn-outline" onclick="exportData('tecnicos','xlsx')">Excel</button>
+            <button class="btn btn-outline" onclick="exportData('tecnicos','pdf')">PDF</button>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-tecnico')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+            Novo técnico
+          </button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input class="filter-input" type="text" placeholder="Buscar técnico..." oninput="renderTable('tecnicos')">
+        <select class="filter-select" onchange="renderTable('tecnicos')">
+          <option value="">Todos os status</option>
+          <option value="Ativo">Ativo</option>
+          <option value="Férias">Férias</option>
+          <option value="Inativo">Inativo</option>
+        </select>
+      </div>
+      <div class="card table-card">
+        <table class="data-table" id="tbl-tecnicos">
+          <thead><tr>
+            <th>Técnico</th><th>Especialidade</th><th>Telefone</th>
+            <th>Email</th><th>Alocações</th><th>Status</th><th class="actions-col">Ações</th>
+          </tr></thead>
+          <tbody id="tbody-tecnicos"></tbody>
+        </table>
+        <div class="table-empty" id="empty-tecnicos" style="display:none">Nenhum técnico encontrado.</div>
+      </div>
+    </div>
+
+    <!-- ==================== CLIENTES ==================== -->
+    <div id="page-clientes" class="page">
+      <div class="page-hero">
+        <div><h1 class="page-title">Clientes</h1><p class="page-sub" id="clientesCount"></p></div>
+        <div class="hero-actions">
+          <div class="export-group">
+            <button class="btn btn-outline" onclick="exportData('clientes','xlsx')">Excel</button>
+            <button class="btn btn-outline" onclick="exportData('clientes','pdf')">PDF</button>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-cliente')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+            Novo cliente
+          </button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input class="filter-input" type="text" placeholder="Buscar cliente, CPF/CNPJ, endereço..." oninput="renderTable('clientes')">
+        <select class="filter-select" onchange="renderTable('clientes')">
+          <option value="">Todos os tipos</option>
+          <option value="Residencial">Residencial</option>
+          <option value="Comercial">Comercial</option>
+          <option value="Industrial">Industrial</option>
+        </select>
+      </div>
+      <div class="card table-card">
+        <table class="data-table" id="tbl-clientes">
+          <thead><tr>
+            <th>Cliente</th><th>Tipo</th><th>CPF/CNPJ</th><th>Telefone</th>
+            <th>Endereço</th><th>Equipamentos</th><th class="actions-col">Ações</th>
+          </tr></thead>
+          <tbody id="tbody-clientes"></tbody>
+        </table>
+        <div class="table-empty" id="empty-clientes" style="display:none">Nenhum cliente encontrado.</div>
+      </div>
+    </div>
+
+    <!-- ==================== ALOCAÇÕES ==================== -->
+    <div id="page-alocacoes" class="page">
+      <div class="page-hero">
+        <div><h1 class="page-title">Alocações</h1><p class="page-sub" id="alocacoesCount"></p></div>
+        <div class="hero-actions">
+          <div class="export-group">
+            <button class="btn btn-outline" onclick="exportData('alocacoes','xlsx')">Excel</button>
+            <button class="btn btn-outline" onclick="exportData('alocacoes','pdf')">PDF</button>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-alocacao')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+            Nova alocação
+          </button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input class="filter-input" type="text" placeholder="Buscar alocação..." oninput="renderTable('alocacoes')">
+        <select class="filter-select" onchange="renderTable('alocacoes')">
+          <option value="">Todos os tipos</option>
+          <option value="Máquina">Máquina</option>
+          <option value="Ferramenta">Ferramenta</option>
+        </select>
+      </div>
+      <div class="card table-card">
+        <table class="data-table" id="tbl-alocacoes">
+          <thead><tr>
+            <th>Técnico / Cliente</th><th>Item</th><th>Tipo</th><th>Série</th>
+            <th>Saída</th><th>Retorno prev.</th><th>Motivo</th><th class="actions-col">Ações</th>
+          </tr></thead>
+          <tbody id="tbody-alocacoes"></tbody>
+        </table>
+        <div class="table-empty" id="empty-alocacoes" style="display:none">Nenhuma alocação encontrada.</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===================== MODAIS ===================== -->
+
+<!-- MODAL MATERIAL -->
+<div class="modal-overlay" id="modal-material" onclick="overlayClose(event,'modal-material')">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-material-title">Novo Material</h2>
+      <button class="modal-close" onclick="closeModal('modal-material')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="mat-id">
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Nome do material *</label>
+          <input type="text" id="mat-nome" placeholder="Ex: Filtro G4 250x250">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Categoria *</label>
+          <select id="mat-categoria">
+            <option value="">Selecione...</option>
+            <option>Filtros</option><option>Refrigerante</option><option>Elétrico</option>
+            <option>Hidráulico</option><option>Fixação</option><option>Outros</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Unidade *</label>
+          <select id="mat-unidade">
+            <option value="">Selecione...</option>
+            <option>un</option><option>m</option><option>kg</option>
+            <option>L</option><option>rolo</option><option>par</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Quantidade atual *</label>
+          <input type="number" id="mat-qtd" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label>Estoque mínimo *</label>
+          <input type="number" id="mat-min" placeholder="0" min="0">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Observações</label>
+          <input type="text" id="mat-obs" placeholder="Informações adicionais">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-material')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveMaterial()">Salvar material</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MÁQUINA -->
+<div class="modal-overlay" id="modal-maquina" onclick="overlayClose(event,'modal-maquina')">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-maquina-title">Novo Equipamento</h2>
+      <button class="modal-close" onclick="closeModal('modal-maquina')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="maq-id">
+      <div class="form-row">
+        <div class="form-group"><label>Marca *</label><input type="text" id="maq-marca" placeholder="Ex: Daikin"></div>
+        <div class="form-group"><label>Modelo *</label><input type="text" id="maq-modelo" placeholder="Ex: Split Inverter 12k"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>BTUs *</label><input type="number" id="maq-btus" placeholder="Ex: 12000"></div>
+        <div class="form-group">
+          <label>Status *</label>
+          <select id="maq-status">
+            <option>Estoque</option><option>Alocado</option><option>Manutenção</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Nº de Série *</label><input type="text" id="maq-serie" placeholder="Ex: SN-123456789"></div>
+        <div class="form-group"><label>Patrimônio</label><input type="text" id="maq-patrimonio" placeholder="Ex: PAT-001"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full"><label>Alocado a (técnico/cliente)</label><input type="text" id="maq-alocado" placeholder="Nome do técnico ou cliente"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full"><label>Observações</label><input type="text" id="maq-obs" placeholder="Informações adicionais"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-maquina')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveMaquina()">Salvar equipamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FERRAMENTA -->
+<div class="modal-overlay" id="modal-ferramenta" onclick="overlayClose(event,'modal-ferramenta')">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-ferramenta-title">Nova Ferramenta</h2>
+      <button class="modal-close" onclick="closeModal('modal-ferramenta')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="fer-id">
+      <div class="form-row">
+        <div class="form-group full"><label>Nome da ferramenta *</label><input type="text" id="fer-nome" placeholder="Ex: Manifold digital"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Qtd total *</label><input type="number" id="fer-total" placeholder="0" min="1"></div>
+        <div class="form-group"><label>Disponível *</label><input type="number" id="fer-disp" placeholder="0" min="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Com técnico</label><input type="number" id="fer-tecnico" placeholder="0" min="0"></div>
+        <div class="form-group"><label>Em manutenção</label><input type="number" id="fer-manut" placeholder="0" min="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full"><label>Nº Patrimônio</label><input type="text" id="fer-patrimonio" placeholder="Opcional"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-ferramenta')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveFerramenta()">Salvar ferramenta</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TÉCNICO -->
+<div class="modal-overlay" id="modal-tecnico" onclick="overlayClose(event,'modal-tecnico')">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-tecnico-title">Novo Técnico</h2>
+      <button class="modal-close" onclick="closeModal('modal-tecnico')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="tec-id">
+      <div class="form-row">
+        <div class="form-group full"><label>Nome completo *</label><input type="text" id="tec-nome" placeholder="Nome do técnico"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Telefone *</label><input type="text" id="tec-tel" placeholder="(11) 00000-0000"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="tec-email" placeholder="email@empresa.com"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Especialidade *</label>
+          <select id="tec-esp">
+            <option>Instalação residencial</option>
+            <option>Manutenção industrial</option>
+            <option>Refrigeração comercial</option>
+            <option>Elétrica / Inverter</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status *</label>
+          <select id="tec-status">
+            <option>Ativo</option><option>Férias</option><option>Inativo</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-tecnico')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveTecnico()">Salvar técnico</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CLIENTE -->
+<div class="modal-overlay" id="modal-cliente" onclick="overlayClose(event,'modal-cliente')">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h2 id="modal-cliente-title">Novo Cliente</h2>
+      <button class="modal-close" onclick="closeModal('modal-cliente')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cli-id">
+      <div class="form-row">
+        <div class="form-group full"><label>Nome / Razão Social *</label><input type="text" id="cli-nome" placeholder="Nome do cliente ou empresa"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo *</label>
+          <select id="cli-tipo">
+            <option>Residencial</option><option>Comercial</option><option>Industrial</option>
+          </select>
+        </div>
+        <div class="form-group"><label>CPF / CNPJ</label><input type="text" id="cli-doc" placeholder="000.000.000-00"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Telefone *</label><input type="text" id="cli-tel" placeholder="(11) 00000-0000"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="cli-email" placeholder="cliente@email.com"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full"><label>Endereço *</label><input type="text" id="cli-end" placeholder="Rua, número, bairro, cidade - UF"></div>
+      </div>
+      <div class="section-divider">Equipamentos instalados</div>
+      <div id="cli-equip-list"></div>
+      <button class="btn btn-ghost btn-sm" onclick="addClienteEquip()" style="margin-top:8px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        Adicionar equipamento
+      </button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-cliente')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCliente()">Salvar cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ALOCAÇÃO -->
+<div class="modal-overlay" id="modal-alocacao" onclick="overlayClose(event,'modal-alocacao')">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-alocacao-title">Nova Alocação</h2>
+      <button class="modal-close" onclick="closeModal('modal-alocacao')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="aloc-id">
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Técnico ou Cliente *</label>
+          <input type="text" id="aloc-responsavel" placeholder="Nome do técnico ou cliente">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo de item *</label>
+          <select id="aloc-tipo"><option>Máquina</option><option>Ferramenta</option></select>
+        </div>
+        <div class="form-group"><label>Item *</label><input type="text" id="aloc-item" placeholder="Modelo / Nome do item"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Nº de Série</label><input type="text" id="aloc-serie" placeholder="Número de série"></div>
+        <div class="form-group"><label>Data de saída *</label><input type="date" id="aloc-saida"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Previsão de retorno</label><input type="date" id="aloc-retorno"></div>
+        <div class="form-group full"><label>Motivo / OS</label><input type="text" id="aloc-motivo" placeholder="Ex: Instalação OS-001"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-alocacao')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveAlocacao()">Confirmar alocação</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR EXCLUSÃO -->
+<div class="modal-overlay" id="modal-delete" onclick="overlayClose(event,'modal-delete')">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2>Confirmar exclusão</h2>
+      <button class="modal-close" onclick="closeModal('modal-delete')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="delete-warning">
+        <div class="delete-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <p id="delete-msg">Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-delete')">Cancelar</button>
+      <button class="btn btn-danger" id="delete-confirm-btn">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
