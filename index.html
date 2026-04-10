@@ -69,6 +69,12 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       <span>Alocações</span>
     </a>
+
+    <div class="nav-section-label">Serviços</div>
+    <a class="nav-link" onclick="showPage('ordens')" data-page="ordens">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="10 9 9 9 8 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>Ordens de Serviço</span>
+    </a>
   </nav>
 
   <div class="sidebar-footer">
@@ -393,6 +399,218 @@
       </div>
     </div>
 
+    <!-- ==================== ORDENS DE SERVIÇO ==================== -->
+    <div id="page-ordens" class="page">
+      <div class="page-hero">
+        <div><h1 class="page-title">Ordens de Serviço</h1><p class="page-sub" id="ordensCount"></p></div>
+        <div class="hero-actions">
+          <div class="export-group">
+            <button class="btn btn-outline" onclick="exportData('ordens','xlsx')">Excel</button>
+          </div>
+          <button class="btn btn-primary" onclick="openNovaOS()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+            Nova OS
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de OSs -->
+      <div id="os-lista-view">
+        <div class="filter-bar">
+          <input class="filter-input" type="text" placeholder="Buscar por protocolo, cliente, técnico..." oninput="renderOSLista()">
+          <select class="filter-select" onchange="renderOSLista()">
+            <option value="">Todos os status</option>
+            <option value="Em Aberto">Em Aberto</option>
+            <option value="Em Andamento">Em Andamento</option>
+            <option value="Concluída">Concluída</option>
+            <option value="Cancelada">Cancelada</option>
+          </select>
+        </div>
+        <div class="card table-card">
+          <table class="data-table">
+            <thead><tr>
+              <th>Protocolo</th><th>Data</th><th>Cliente</th><th>Técnico</th>
+              <th>Descrição</th><th>Status</th><th class="actions-col">Ações</th>
+            </tr></thead>
+            <tbody id="tbody-ordens"></tbody>
+          </table>
+          <div class="table-empty" id="empty-ordens" style="display:none">Nenhuma OS encontrada. Clique em "Nova OS" para começar.</div>
+        </div>
+      </div>
+
+      <!-- Formulário OS -->
+      <div id="os-form-view" style="display:none">
+        <div class="os-form-topbar">
+          <button class="btn btn-ghost" onclick="voltarOSLista()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Voltar
+          </button>
+          <div class="os-form-title" id="os-form-title">Nova Ordem de Serviço</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-outline" onclick="imprimirOS()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="6 9 6 2 18 2 18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="6" y="14" width="12" height="8" rx="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Imprimir / PDF
+            </button>
+            <button class="btn btn-primary" onclick="salvarOS()">Salvar OS</button>
+          </div>
+        </div>
+
+        <div class="os-doc" id="os-doc">
+          <!-- CABEÇALHO -->
+          <div class="os-header">
+            <div class="os-logo-area">
+              <div class="os-logo-box">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="currentColor" stroke-width="1.5"/><path d="M9 22V12h6v10" stroke="currentColor" stroke-width="1.5"/></svg>
+              </div>
+              <div>
+                <div class="os-company">HVAC Pro</div>
+                <div class="os-company-sub">Ar Condicionado</div>
+              </div>
+            </div>
+            <div class="os-title-area">
+              <div class="os-doc-title">ORDEM DE SERVIÇO — SAÍDA DE MATERIAL</div>
+              <div class="os-protocolo-badge" id="os-protocolo-display">—</div>
+            </div>
+            <div class="os-meta-grid">
+              <div class="os-meta-item">
+                <div class="os-meta-label">DATA</div>
+                <input type="date" class="os-input" id="os-data">
+              </div>
+              <div class="os-meta-item">
+                <div class="os-meta-label">HORA</div>
+                <input type="time" class="os-input" id="os-hora">
+              </div>
+              <div class="os-meta-item" style="grid-column:1/-1">
+                <div class="os-meta-label">STATUS</div>
+                <select class="os-input" id="os-status">
+                  <option>Em Aberto</option>
+                  <option>Em Andamento</option>
+                  <option>Concluída</option>
+                  <option>Cancelada</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- DADOS DO CLIENTE -->
+          <div class="os-section">
+            <div class="os-section-title">DADOS DO CLIENTE / SOLICITANTE</div>
+            <div class="os-fields">
+              <div class="os-field-row">
+                <span class="os-field-label">Cliente:</span>
+                <select class="os-input" id="os-cliente" onchange="preencherCliente()" style="flex:2">
+                  <option value="">Selecione o cliente...</option>
+                </select>
+                <span class="os-field-label" style="margin-left:12px">Técnico:</span>
+                <select class="os-input" id="os-tecnico" style="flex:1.5">
+                  <option value="">Selecione...</option>
+                </select>
+              </div>
+              <div class="os-field-row">
+                <span class="os-field-label">Morada:</span>
+                <input type="text" class="os-input" id="os-morada" placeholder="Endereço completo" style="flex:3">
+                <span class="os-field-label" style="margin-left:12px">Contacto:</span>
+                <input type="text" class="os-input" id="os-contacto" placeholder="Telefone" style="flex:1.2">
+              </div>
+              <div class="os-field-row">
+                <span class="os-field-label">Solicitante:</span>
+                <input type="text" class="os-input" id="os-solicitante" placeholder="Nome do responsável" style="flex:2">
+                <span class="os-field-label" style="margin-left:12px">E-mail:</span>
+                <input type="email" class="os-input" id="os-email" placeholder="email@cliente.com" style="flex:2">
+              </div>
+              <div class="os-field-row">
+                <span class="os-field-label">Serviço:</span>
+                <textarea class="os-input" id="os-descricao" rows="2" placeholder="Descreva o serviço a ser realizado..." style="flex:1;resize:vertical"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- EQUIPAMENTOS -->
+          <div class="os-section">
+            <div class="os-section-title">EQUIPAMENTOS / MÁQUINAS</div>
+            <table class="os-table">
+              <thead><tr>
+                <th style="width:28px">#</th>
+                <th>Modelo / Marca</th>
+                <th style="width:150px">Nº Série</th>
+                <th style="width:100px">Tipo</th>
+                <th style="width:130px">Localização</th>
+                <th>Obs.</th>
+                <th style="width:28px" class="no-print"></th>
+              </tr></thead>
+              <tbody id="os-equip-body"></tbody>
+            </table>
+            <button class="os-add-btn no-print" onclick="addOSEquip()">+ Adicionar equipamento</button>
+          </div>
+
+          <!-- MATERIAIS -->
+          <div class="os-section">
+            <div class="os-section-title">MATERIAIS — SAÍDA DE ARMAZÉM</div>
+            <table class="os-table">
+              <thead><tr>
+                <th style="width:28px">✓</th>
+                <th style="min-width:200px">Material (do estoque)</th>
+                <th>Descrição</th>
+                <th style="width:55px">Un.</th>
+                <th style="width:75px">Qtd. Sol.</th>
+                <th style="width:75px">Qtd. Ent.</th>
+                <th style="width:110px">Estoque atual</th>
+                <th>Obs.</th>
+                <th style="width:28px" class="no-print"></th>
+              </tr></thead>
+              <tbody id="os-mat-body"></tbody>
+            </table>
+            <button class="os-add-btn no-print" onclick="addOSMaterial()">+ Adicionar material</button>
+          </div>
+
+          <!-- TUBOS DE COBRE -->
+          <div class="os-section">
+            <div class="os-section-title">TUBOS DE COBRE — SAÍDA DE ARMAZÉM</div>
+            <table class="os-table">
+              <thead><tr>
+                <th>Diâmetro</th>
+                <th>Tipo / Liga</th>
+                <th style="width:120px">Comprimento (m)</th>
+                <th style="width:75px">Qtd. Sol.</th>
+                <th style="width:75px">Qtd. Ent.</th>
+                <th>Obs.</th>
+                <th style="width:28px" class="no-print"></th>
+              </tr></thead>
+              <tbody id="os-cobre-body"></tbody>
+            </table>
+            <button class="os-add-btn no-print" onclick="addOSCobre()">+ Adicionar tubo</button>
+          </div>
+
+          <!-- OBSERVAÇÕES -->
+          <div class="os-section">
+            <div class="os-section-title">OBSERVAÇÕES GERAIS</div>
+            <textarea class="os-input" id="os-obs-gerais" rows="3" style="width:100%;resize:vertical" placeholder="Observações adicionais, pendências, instruções..."></textarea>
+          </div>
+
+          <!-- ASSINATURAS -->
+          <div class="os-assinaturas">
+            <div class="os-ass-box">
+              <div class="os-ass-line"></div>
+              <div class="os-ass-label">Assinatura Solicitante</div>
+            </div>
+            <div class="os-ass-box">
+              <div class="os-ass-line"></div>
+              <div class="os-ass-label">Assinatura Resp. Armazém</div>
+            </div>
+            <div class="os-ass-box">
+              <div class="os-ass-line"></div>
+              <div class="os-ass-label">Assinatura Técnico</div>
+            </div>
+          </div>
+
+          <!-- RODAPÉ -->
+          <div class="os-footer">
+            HVAC Pro — Ar Condicionado &nbsp;|&nbsp; Protocolo: <span id="os-protocolo-footer">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -655,6 +873,74 @@
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-alocacao')">Cancelar</button>
       <button class="btn btn-primary" onclick="saveAlocacao()">Confirmar alocação</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL: ALOCAR EQUIPAMENTO AO CLIENTE -->
+<div class="modal-overlay" id="modal-alocar-equip" onclick="overlayClose(event,'modal-alocar-equip')">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Alocar Equipamento ao Cliente</h2>
+      <button class="modal-close" onclick="closeModal('modal-alocar-equip')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group full" style="margin-bottom:14px;padding:10px 14px;background:var(--accent-light);border-radius:var(--radius-sm)">
+        <div style="font-size:11px;color:var(--accent-text);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Cliente</div>
+        <div style="font-size:15px;font-weight:600;color:var(--accent-text)" id="aloc-equip-cliente">—</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Equipamento disponível em estoque *</label>
+          <select id="aloc-equip-sel">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Data de instalação *</label>
+          <input type="date" id="aloc-equip-data">
+        </div>
+        <div class="form-group">
+          <label>Local de instalação</label>
+          <input type="text" id="aloc-equip-local" placeholder="Ex: Sala principal, 2º andar">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Observações</label>
+          <input type="text" id="aloc-equip-obs" placeholder="Informações adicionais">
+        </div>
+      </div>
+      <div style="padding:10px 0 0;font-size:12px;color:var(--text-muted)">
+        Ao confirmar, o equipamento sairá do estoque e será vinculado a este cliente.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-alocar-equip')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarAlocacaoEquip()">Confirmar instalação</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: VER EQUIPAMENTOS INSTALADOS NO CLIENTE -->
+<div class="modal-overlay" id="modal-equip-cliente" onclick="overlayClose(event,'modal-equip-cliente')">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h2 id="equip-cli-titulo">Equipamentos instalados</h2>
+      <button class="modal-close" onclick="closeModal('modal-equip-cliente')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="equip-cli-body"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-equip-cliente')">Fechar</button>
     </div>
   </div>
 </div>
