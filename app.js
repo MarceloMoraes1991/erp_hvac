@@ -1,3 +1,86 @@
+/* ============================================================
+   AUTENTICAÇÃO — Login / Logout
+   ============================================================ */
+const USUARIOS = [
+  { usuario: 'admin',   senha: 'admin123', nome: 'Administrador', perfil: 'Admin',   initials: 'AD' },
+  { usuario: 'tecnico', senha: 'tec123',   nome: 'Carlos Mendes', perfil: 'Técnico', initials: 'CM' },
+];
+
+let usuarioLogado = null;
+
+function doLogin() {
+  const user = document.getElementById('login-user').value.trim().toLowerCase();
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  const btn   = document.querySelector('.login-btn');
+
+  // Verifica usuário inativo antes de tudo
+  const dbUser = DB.usuarios ? DB.usuarios.find(u => u.login === user) : null;
+  if (dbUser && dbUser.status === 'Inativo') {
+    errEl.textContent = 'Este usuário está inativo. Contacte o administrador.';
+    errEl.style.display = 'flex';
+    return;
+  }
+
+  btn.classList.add('loading');
+  btn.textContent = 'Entrando...';
+
+  setTimeout(() => {
+    const found = USUARIOS.find(u => u.usuario === user && u.senha === pass);
+    if (found) {
+      usuarioLogado = found;
+      errEl.style.display = 'none';
+      errEl.textContent = 'Usuário ou senha incorretos.'; // reset msg
+      document.getElementById('login-screen').classList.add('hidden');
+      _atualizarSidebarUser();
+      sessionStorage.setItem('hvac-user', JSON.stringify(found));
+    } else {
+      errEl.textContent = 'Usuário ou senha incorretos.';
+      errEl.style.display = 'flex';
+      document.getElementById('login-pass').value = '';
+      document.getElementById('login-pass').focus();
+      btn.classList.remove('loading');
+      btn.innerHTML = 'Entrar <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+  }, 600);
+}
+
+function doLogout() {
+  if (!confirm('Deseja sair do sistema?')) return;
+  usuarioLogado = null;
+  sessionStorage.removeItem('hvac-user');
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('login-screen').classList.remove('hidden');
+  // Reset btn
+  const btn = document.querySelector('.login-btn');
+  btn.classList.remove('loading');
+  btn.innerHTML = 'Entrar <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function toggleLoginPass(btn) {
+  const input = document.getElementById('login-pass');
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+function _atualizarSidebarUser() {
+  if (!usuarioLogado) return;
+  const avatarEl = document.querySelector('.user-avatar');
+  const nameEl   = document.querySelector('.user-name');
+  const roleEl   = document.querySelector('.user-role');
+  if (avatarEl) avatarEl.textContent = usuarioLogado.initials;
+  if (nameEl)   nameEl.textContent   = usuarioLogado.nome;
+  if (roleEl)   roleEl.textContent   = usuarioLogado.perfil;
+  // Admin visibility
+  _aplicarVisibilidadeAdmin();
+  // Registra último acesso no DB
+  if (DB.usuarios) {
+    const idx = DB.usuarios.findIndex(u => u.login === usuarioLogado.login);
+    if (idx !== -1) DB.usuarios[idx].ultimoAcesso = new Date().toISOString();
+  }
+}
+
 /* ===================================================
    HVAC PRO — app.js  (v4)
    =================================================== */
@@ -97,9 +180,17 @@ function showPage(page) {
   if (window.innerWidth<=680) document.getElementById('sidebar').classList.remove('mobile-open');
 }
 function renderPage(page) {
-  if (page==='dashboard') renderDashboard();
+  if (page==='dashboard')  renderDashboard();
   else if (page==='agenda') renderAgenda();
   else if (page==='ordens') renderOSLista();
+  else if (page==='usuarios') {
+    if (usuarioLogado && usuarioLogado.perfil !== 'Admin') {
+      toast('Acesso restrito a administradores.', 'error');
+      showPage('dashboard');
+      return;
+    }
+    renderUsuarios();
+  }
   else { renderTable(page); updateCount(page); }
 }
 function toggleSidebar() {
@@ -507,7 +598,19 @@ let _tt;
 function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),3000);}
 
 /* ============================================================ INIT */
-document.addEventListener('DOMContentLoaded',()=>{applyTheme(currentTheme);showPage('dashboard');});
+document.addEventListener('DOMContentLoaded', () => {
+  applyTheme(currentTheme);
+  // Verifica sessão existente (recarregamento de página)
+  const saved = sessionStorage.getItem('hvac-user');
+  if (saved) {
+    try {
+      usuarioLogado = JSON.parse(saved);
+      document.getElementById('login-screen').classList.add('hidden');
+      _atualizarSidebarUser();
+    } catch(e) { sessionStorage.removeItem('hvac-user'); }
+  }
+  showPage('dashboard');
+});
 
 
 /* ============================================================
@@ -518,6 +621,7 @@ document.addEventListener('DOMContentLoaded',()=>{applyTheme(currentTheme);showP
    ============================================================ */
 
 let osEditId=null;
+let osEquipRows=[];
 let osMatRows=[];
 let osCobreRows=[];
 
@@ -526,7 +630,7 @@ function abrirOSCliente(clienteId){showPage('ordens');setTimeout(()=>openNovaOS(
 function gerarProtocolo(){return`HVAC-${new Date().getFullYear()}-${Math.floor(100000+Math.random()*900000)}`;}
 
 function openNovaOS(preCliId){
-  osEditId=null;osMatRows=[];osCobreRows=[];
+  osEditId=null;osEquipRows=[];osMatRows=[];osCobreRows=[];
   document.getElementById('os-form-title').textContent='Nova Ordem de Serviço';
   const p=gerarProtocolo();_sp(p);
   document.getElementById('os-data').value=new Date().toISOString().slice(0,10);
@@ -535,7 +639,7 @@ function openNovaOS(preCliId){
   ['os-morada','os-contacto','os-solicitante','os-email','os-descricao','os-obs-gerais'].forEach(id=>document.getElementById(id).value='');
   _popSels(preCliId||null,null);
   if(preCliId)setTimeout(()=>preencherCliente(),80);
-  _addMatRow();renderOSMat();renderOSCobre();
+  renderOSEquip();_addMatRow();renderOSMat();renderOSCobre();
   document.getElementById('os-lista-view').style.display='none';
   document.getElementById('os-form-view').style.display='block';
   document.querySelector('.content').scrollTop=0;
@@ -570,6 +674,53 @@ function voltarOSLista(){
   }
   document.getElementById('os-lista-view').style.display='block';
   document.getElementById('os-form-view').style.display='none';
+}
+
+/* ---- Equipamentos da OS ---- */
+function addOSEquip(data){
+  osEquipRows.push(data||{maquinaId:'',modelo:'',serie:'',tipo:'Instalação',local:'',obs:''});
+  renderOSEquip();
+}
+
+function renderOSEquip(){
+  const tbody=document.getElementById('os-equip-body');if(!tbody)return;
+  const tipoOpts=['Instalação','Manutenção','Reparação','Desmontagem','Substituição'];
+  if(!osEquipRows.length){tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--text-subtle);font-size:12px;padding:14px">Nenhum equipamento adicionado. Clique em "+ Adicionar equipamento".</td></tr>`;return;}
+  tbody.innerHTML=osEquipRows.map((r,i)=>`
+    <tr>
+      <td class="os-num-cell">${i+1}</td>
+      <td style="min-width:200px">
+        <select onchange="onEquipSel(${i},this)" style="width:100%">
+          <option value="">— ou selecione do cadastro —</option>
+          ${DB.maquinas.map(m=>`<option value="${m.id}" ${r.maquinaId==m.id?'selected':''}>${m.marca} ${m.modelo} | ${m.serie} | ${maqBadge(m.status).replace(/<[^>]+>/g,'')}</option>`).join('')}
+        </select>
+        <input type="text" placeholder="Modelo / Marca (se não listado)" value="${r.modelo||''}"
+          style="margin-top:3px;font-size:11px;color:var(--text-muted);width:100%"
+          onchange="osEquipRows[${i}].modelo=this.value">
+      </td>
+      <td><input type="text" placeholder="Nº de série" value="${r.serie||''}" onchange="osEquipRows[${i}].serie=this.value"></td>
+      <td>
+        <select onchange="osEquipRows[${i}].tipo=this.value">
+          ${tipoOpts.map(t=>`<option ${r.tipo===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </td>
+      <td><input type="text" placeholder="Ex: Sala, 2º andar" value="${r.local||''}" onchange="osEquipRows[${i}].local=this.value"></td>
+      <td><input type="text" placeholder="Obs." value="${r.obs||''}" onchange="osEquipRows[${i}].obs=this.value"></td>
+      <td class="os-del-cell no-print">
+        <button onclick="osEquipRows.splice(${i},1);renderOSEquip()" title="Remover">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </td>
+    </tr>`).join('');
+}
+
+function onEquipSel(i,sel){
+  const maq=DB.maquinas.find(m=>m.id==sel.value);
+  if(!maq){osEquipRows[i].maquinaId='';return;}
+  osEquipRows[i].maquinaId=maq.id;
+  osEquipRows[i].modelo=`${maq.marca} ${maq.modelo}`;
+  osEquipRows[i].serie=maq.serie;
+  renderOSEquip();
 }
 
 /* ---- Materiais com baixa em tempo real ---- */
@@ -670,6 +821,9 @@ function salvarOS(){
   if(!cliId)return toast('Selecione o cliente.','error');
   if(!document.getElementById('os-data').value)return toast('Informe a data.','error');
 
+  // Coleta equipamentos
+  const equipamentos=osEquipRows.filter(e=>e.modelo||e.serie).map(e=>({...e}));
+
   const matTrs=document.querySelectorAll('#os-mat-body tr');
   const materiais=Array.from(matTrs).map((tr,i)=>{
     const sel=tr.querySelector('select');const inputs=tr.querySelectorAll('input');
@@ -693,7 +847,7 @@ function salvarOS(){
     solicitante:document.getElementById('os-solicitante').value,email:document.getElementById('os-email').value,
     tecnicoNome:document.getElementById('os-tecnico').value,descricao:document.getElementById('os-descricao').value,
     obsGerais:document.getElementById('os-obs-gerais').value,
-    materiais,cobres
+    materiais,cobres,equipamentos
   };
 
   // Registra movimentações (a baixa já foi feita ao vivo, só registra no histórico)
@@ -730,9 +884,10 @@ function editOS(id){
   document.getElementById('os-descricao').value=os.descricao||'';document.getElementById('os-obs-gerais').value=os.obsGerais||'';
   _popSels(os.clienteId,os.tecnicoNome);
   // Carrega materiais com _baixaAtual=0 (estoque foi restaurado, usuário re-digita)
+  osEquipRows=(os.equipamentos||[]).map(e=>({...e}));
   osMatRows=(os.materiais||[]).map(m=>({...m,_baixaAtual:0,qtdEnt:0}));
   osCobreRows=(os.cobres||[]).map(c=>({...c}));
-  renderOSMat();renderOSCobre();
+  renderOSEquip();renderOSMat();renderOSCobre();
   document.getElementById('os-lista-view').style.display='none';
   document.getElementById('os-form-view').style.display='block';
   document.querySelector('.content').scrollTop=0;
@@ -836,3 +991,363 @@ ${cobR?`<div class="sc"><div class="st">TUBOS DE COBRE</div><table><thead><tr><t
 <script>window.onload=()=>{window.print()}<\/script></body></html>`);
   w.document.close();
 }
+
+/* ---- Compatibility stubs (old modal references) ---- */
+function saveAlocacao() { toast('Use o botão "Alocar equipamento" na aba Clientes.', ''); }
+function addClienteEquip() {}
+function removeClienteEquip() {}
+function renderClienteEquips() {}
+function openModalNew(id) { openModal(id); }
+
+/* ============================================================
+   GESTÃO DE USUÁRIOS (Admin only)
+   ============================================================ */
+
+// Banco de usuários — persiste em memória (mesmo session do DB)
+DB.usuarios = [
+  {
+    id: 1, nome: 'Administrador', login: 'admin', senha: 'admin123',
+    perfil: 'Admin', email: 'admin@hvacpro.com', tel: '',
+    status: 'Ativo', obs: '', initials: 'AD',
+    ultimoAcesso: new Date().toISOString(),
+    permissoes: ['dashboard','agenda','materiais','maquinas','ferramentas','tecnicos','clientes','alocacoes','ordens','usuarios']
+  },
+  {
+    id: 2, nome: 'Carlos Mendes', login: 'tecnico', senha: 'tec123',
+    perfil: 'Técnico', email: 'carlos@hvacpro.com', tel: '(11) 98765-0001',
+    status: 'Ativo', obs: 'Técnico de instalação residencial', initials: 'CM',
+    ultimoAcesso: null,
+    permissoes: ['dashboard','agenda','ordens','clientes']
+  },
+];
+DB.nextId.usuarios = 3;
+
+// Permissões por perfil (preset)
+const PERFIL_PERMISSOES = {
+  'Admin':       ['dashboard','agenda','materiais','maquinas','ferramentas','tecnicos','clientes','alocacoes','ordens','usuarios'],
+  'Gestor':      ['dashboard','agenda','materiais','maquinas','ferramentas','tecnicos','clientes','alocacoes','ordens'],
+  'Técnico':     ['dashboard','agenda','ordens','clientes','materiais'],
+  'Visualizador':['dashboard','agenda'],
+};
+
+const MODULOS = [
+  { id:'dashboard',  label:'Dashboard' },
+  { id:'agenda',     label:'Agenda' },
+  { id:'materiais',  label:'Materiais' },
+  { id:'maquinas',   label:'Equipamentos' },
+  { id:'ferramentas',label:'Ferramentas' },
+  { id:'tecnicos',   label:'Técnicos' },
+  { id:'clientes',   label:'Clientes' },
+  { id:'alocacoes',  label:'Alocações' },
+  { id:'ordens',     label:'Ordens de Serviço' },
+  { id:'usuarios',   label:'Usuários (Admin)' },
+];
+
+let _permSelecionadas = [];
+
+/* ---------- Visibilidade: só admin vê o menu Usuários ---------- */
+function _aplicarVisibilidadeAdmin() {
+  const isAdmin = usuarioLogado?.perfil === 'Admin';
+  document.querySelectorAll('.nav-admin-only').forEach(el => {
+    el.style.display = isAdmin ? '' : 'none';
+  });
+}
+
+/* ---------- Abrir modal novo usuário ---------- */
+function openModalNovoUsuario() {
+  document.getElementById('modal-usuario-title').textContent = 'Novo Usuário';
+  document.getElementById('usr-id').value     = '';
+  document.getElementById('usr-nome').value   = '';
+  document.getElementById('usr-login').value  = '';
+  document.getElementById('usr-email').value  = '';
+  document.getElementById('usr-tel').value    = '';
+  document.getElementById('usr-senha').value  = '';
+  document.getElementById('usr-senha2').value = '';
+  document.getElementById('usr-obs').value    = '';
+  document.getElementById('usr-perfil').value = 'Técnico';
+  document.getElementById('usr-status').value = 'Ativo';
+  document.getElementById('usr-senha-label').textContent = 'Senha *';
+  document.getElementById('usr-avatar-preview').textContent = '?';
+  document.getElementById('usr-pwd-match').style.display = 'none';
+  _permSelecionadas = [...PERFIL_PERMISSOES['Técnico']];
+  _renderPermGrid();
+  openModal('modal-usuario');
+}
+
+/* ---------- Editar usuário ---------- */
+function editUsuario(id) {
+  const u = DB.usuarios.find(x => x.id === id);
+  if (!u) return;
+  document.getElementById('modal-usuario-title').textContent = 'Editar Usuário';
+  document.getElementById('usr-id').value     = id;
+  document.getElementById('usr-nome').value   = u.nome;
+  document.getElementById('usr-login').value  = u.login;
+  document.getElementById('usr-email').value  = u.email || '';
+  document.getElementById('usr-tel').value    = u.tel || '';
+  document.getElementById('usr-senha').value  = '';
+  document.getElementById('usr-senha2').value = '';
+  document.getElementById('usr-obs').value    = u.obs || '';
+  document.getElementById('usr-perfil').value = u.perfil;
+  document.getElementById('usr-status').value = u.status;
+  document.getElementById('usr-senha-label').textContent = 'Nova senha (deixe em branco para manter)';
+  document.getElementById('usr-avatar-preview').textContent = u.initials;
+  document.getElementById('usr-pwd-match').style.display = 'none';
+  _permSelecionadas = [...(u.permissoes || [])];
+  _renderPermGrid();
+  openModal('modal-usuario');
+}
+
+/* ---------- Grid de permissões ---------- */
+function _renderPermGrid() {
+  const perfil = document.getElementById('usr-perfil')?.value || 'Técnico';
+  document.getElementById('perm-grid').innerHTML = MODULOS.map(m => {
+    const ativo = _permSelecionadas.includes(m.id);
+    return `
+      <div class="perm-item ${ativo ? 'active' : ''}" onclick="togglePerm('${m.id}',this)">
+        <div class="perm-check">
+          ${ativo ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+        </div>
+        <span>${m.label}</span>
+      </div>`;
+  }).join('');
+}
+
+function togglePerm(modId, el) {
+  if (_permSelecionadas.includes(modId)) {
+    _permSelecionadas = _permSelecionadas.filter(p => p !== modId);
+    el.classList.remove('active');
+    el.querySelector('.perm-check').innerHTML = '';
+  } else {
+    _permSelecionadas.push(modId);
+    el.classList.add('active');
+    el.querySelector('.perm-check').innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+}
+
+// Ao mudar o perfil, atualiza permissões preset
+document.addEventListener('change', e => {
+  if (e.target.id === 'usr-perfil') {
+    _permSelecionadas = [...(PERFIL_PERMISSOES[e.target.value] || [])];
+    _renderPermGrid();
+  }
+});
+
+function atualizarPreviewAvatar() {
+  const nome = document.getElementById('usr-nome').value.trim();
+  const inits = nome.split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('') || '?';
+  document.getElementById('usr-avatar-preview').textContent = inits;
+}
+
+function togglePwd(inputId, btn) {
+  const input = document.getElementById(inputId);
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+/* ---------- Salvar usuário ---------- */
+function salvarUsuario() {
+  const id     = document.getElementById('usr-id').value;
+  const nome   = document.getElementById('usr-nome').value.trim();
+  const login  = document.getElementById('usr-login').value.trim().toLowerCase();
+  const email  = document.getElementById('usr-email').value.trim();
+  const tel    = document.getElementById('usr-tel').value.trim();
+  const perfil = document.getElementById('usr-perfil').value;
+  const status = document.getElementById('usr-status').value;
+  const obs    = document.getElementById('usr-obs').value.trim();
+  const senha1 = document.getElementById('usr-senha').value;
+  const senha2 = document.getElementById('usr-senha2').value;
+
+  if (!nome)  return toast('Informe o nome completo.', 'error');
+  if (!login) return toast('Informe o login.', 'error');
+
+  // Valida login único
+  const dupLogin = DB.usuarios.find(u => u.login === login && u.id != id);
+  if (dupLogin) return toast('Este login já está em uso.', 'error');
+
+  // Valida senha
+  if (!id && !senha1) return toast('Defina uma senha para o novo usuário.', 'error');
+  if (senha1 && senha1.length < 6) return toast('A senha deve ter no mínimo 6 caracteres.', 'error');
+  if (senha1 && senha1 !== senha2) {
+    document.getElementById('usr-pwd-match').style.display = 'block';
+    document.getElementById('usr-pwd-match').textContent = '⚠ As senhas não coincidem.';
+    document.getElementById('usr-pwd-match').style.color = 'var(--danger)';
+    return;
+  }
+
+  const initials = nome.split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+  const permissoes = _permSelecionadas.length ? _permSelecionadas : PERFIL_PERMISSOES[perfil];
+
+  if (id) {
+    const idx = DB.usuarios.findIndex(u => u.id == id);
+    DB.usuarios[idx] = {
+      ...DB.usuarios[idx], nome, login, email, tel, perfil, status, obs, initials, permissoes,
+      ...(senha1 ? { senha: senha1 } : {})
+    };
+    // Atualiza sessão se o utilizador editado for o logado
+    if (usuarioLogado && usuarioLogado.login === DB.usuarios[idx].login) {
+      usuarioLogado = { ...DB.usuarios[idx] };
+      sessionStorage.setItem('hvac-user', JSON.stringify(usuarioLogado));
+      _atualizarSidebarUser();
+    }
+    // Sincroniza array USUARIOS para login funcionar
+    _sincronizarUSUARIOS();
+    toast('Usuário atualizado!', 'success');
+  } else {
+    const novo = { id: DB.nextId.usuarios++, nome, login, email, tel, perfil, status, obs,
+      senha: senha1, initials, permissoes, ultimoAcesso: null };
+    DB.usuarios.push(novo);
+    _sincronizarUSUARIOS();
+    toast('Usuário cadastrado!', 'success');
+  }
+
+  closeModal('modal-usuario');
+  renderUsuarios();
+}
+
+/* Sincroniza DB.usuarios → USUARIOS (array usado pelo login) */
+function _sincronizarUSUARIOS() {
+  USUARIOS.length = 0;
+  DB.usuarios.forEach(u => {
+    USUARIOS.push({ usuario: u.login, senha: u.senha, nome: u.nome, perfil: u.perfil, initials: u.initials, status: u.status });
+  });
+}
+
+/* ---------- Inativar / Ativar rápido ---------- */
+function toggleStatusUsuario(id) {
+  const idx = DB.usuarios.findIndex(u => u.id === id);
+  if (idx === -1) return;
+  const u = DB.usuarios[idx];
+  if (u.login === 'admin') return toast('O admin não pode ser inativado.', 'error');
+  if (usuarioLogado?.login === u.login) return toast('Não pode inativar o próprio usuário.', 'error');
+  DB.usuarios[idx].status = u.status === 'Ativo' ? 'Inativo' : 'Ativo';
+  _sincronizarUSUARIOS();
+  renderUsuarios();
+  toast(`Usuário ${DB.usuarios[idx].status === 'Ativo' ? 'ativado' : 'inativado'}.`, 'success');
+}
+
+/* ---------- Modal trocar senha ---------- */
+function abrirTrocarSenha(id) {
+  const u = DB.usuarios.find(x => x.id === id);
+  if (!u) return;
+  document.getElementById('troca-usr-id').value  = id;
+  document.getElementById('troca-usr-nome').textContent = u.nome;
+  document.getElementById('troca-senha1').value  = '';
+  document.getElementById('troca-senha2').value  = '';
+  document.getElementById('troca-match').style.display = 'none';
+  openModal('modal-trocar-senha');
+}
+
+function salvarTrocaSenha() {
+  const id     = document.getElementById('troca-usr-id').value;
+  const senha1 = document.getElementById('troca-senha1').value;
+  const senha2 = document.getElementById('troca-senha2').value;
+  const matchEl = document.getElementById('troca-match');
+
+  if (!senha1 || senha1.length < 6) return toast('Senha deve ter mínimo 6 caracteres.', 'error');
+  if (senha1 !== senha2) {
+    matchEl.style.display = 'block';
+    matchEl.textContent = '⚠ As senhas não coincidem.';
+    matchEl.style.color = 'var(--danger)';
+    return;
+  }
+  const idx = DB.usuarios.findIndex(u => u.id == id);
+  if (idx === -1) return;
+  DB.usuarios[idx].senha = senha1;
+  _sincronizarUSUARIOS();
+  closeModal('modal-trocar-senha');
+  toast('Senha alterada com sucesso!', 'success');
+}
+
+/* ---------- Excluir usuário ---------- */
+function confirmarExcluirUsuario(id) {
+  const u = DB.usuarios.find(x => x.id === id);
+  if (!u) return;
+  if (u.login === 'admin') return toast('O admin padrão não pode ser excluído.', 'error');
+  if (usuarioLogado?.login === u.login) return toast('Não pode excluir o próprio usuário.', 'error');
+  document.getElementById('delete-msg').textContent = `Excluir o utilizador "${u.nome}"? Esta ação não pode ser desfeita.`;
+  document.getElementById('delete-confirm-btn').onclick = () => {
+    DB.usuarios = DB.usuarios.filter(x => x.id !== id);
+    _sincronizarUSUARIOS();
+    closeModal('modal-delete');
+    renderUsuarios();
+    toast('Usuário excluído.', 'success');
+  };
+  openModal('modal-delete');
+}
+
+/* ---------- Render da tabela ---------- */
+function renderUsuarios() {
+  const tbody = document.getElementById('tbody-usuarios');
+  const empty = document.getElementById('empty-usuarios');
+  if (!tbody) return;
+
+  const bar = document.querySelector('#page-usuarios .filter-bar');
+  const q   = bar?.querySelector('.filter-input')?.value.toLowerCase() || '';
+  const pf  = bar?.querySelectorAll('.filter-select')[0]?.value || '';
+  const st  = bar?.querySelectorAll('.filter-select')[1]?.value || '';
+
+  const perfilClass = { Admin:'perfil-admin', Gestor:'perfil-gestor', Técnico:'perfil-tecnico', Visualizador:'perfil-visualizador' };
+
+  const data = DB.usuarios.filter(u =>
+    (!q || u.nome.toLowerCase().includes(q) || u.login.toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q))
+    && (!pf || u.perfil === pf)
+    && (!st || u.status === st)
+  );
+
+  empty.style.display = data.length === 0 ? 'block' : 'none';
+
+  tbody.innerHTML = data.map(u => `
+    <tr class="${u.status === 'Inativo' ? 'row-inativo' : ''}">
+      <td>
+        <div class="tech-cell">
+          <div class="tech-avatar" style="${u.status==='Inativo'?'opacity:.5':''}">${u.initials}</div>
+          <div>
+            <div style="font-weight:500">${u.nome}</div>
+            ${u.tel ? `<div style="font-size:11px;color:var(--text-muted)">${u.tel}</div>` : ''}
+          </div>
+        </div>
+      </td>
+      <td class="mono">${u.login}</td>
+      <td><span class="perfil-badge ${perfilClass[u.perfil]||''}">${u.perfil}</span></td>
+      <td style="color:var(--text-muted);font-size:12px">${u.email || '—'}</td>
+      <td style="font-size:12px;color:var(--text-muted)">${u.ultimoAcesso ? new Date(u.ultimoAcesso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'}</td>
+      <td><span class="badge ${u.status==='Ativo'?'badge-ok':'badge-gray'}">${u.status}</span></td>
+      <td>
+        <div class="row-actions">
+          <button class="btn-icon" onclick="editUsuario(${u.id})" title="Editar usuário">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <button class="btn-icon" onclick="abrirTrocarSenha(${u.id})" title="Trocar senha">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
+          </button>
+          <button class="btn-icon ${u.status==='Ativo'?'':'danger'}" onclick="toggleStatusUsuario(${u.id})" title="${u.status==='Ativo'?'Inativar usuário':'Ativar usuário'}">
+            ${u.status === 'Ativo'
+              ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+              : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+            }
+          </button>
+          ${u.login !== 'admin' ? `
+          <button class="btn-icon danger" onclick="confirmarExcluirUsuario(${u.id})" title="Excluir usuário">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>` : ''}
+        </div>
+      </td>
+    </tr>`).join('');
+
+  // KPIs
+  const total   = DB.usuarios.length;
+  const ativos  = DB.usuarios.filter(u=>u.status==='Ativo').length;
+  const admins  = DB.usuarios.filter(u=>u.perfil==='Admin').length;
+  const inativos= DB.usuarios.filter(u=>u.status==='Inativo').length;
+  document.getElementById('usuarios-kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">Total de usuários</div><div class="kpi-value">${total}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Ativos</div><div class="kpi-value" style="color:var(--success)">${ativos}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Administradores</div><div class="kpi-value" style="color:var(--accent)">${admins}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Inativos</div><div class="kpi-value" style="color:var(--text-muted)">${inativos}</div></div>
+  `;
+
+  document.getElementById('usuariosCount').textContent = `${total} usuário${total!==1?'s':''}`;
+}
+
+/* ---------- Hook renderPage para usuarios ---------- */
+// Inicializa sincronização do USUARIOS array com DB.usuarios
+_sincronizarUSUARIOS();

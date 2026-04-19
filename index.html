@@ -12,6 +12,64 @@
 </head>
 <body>
 
+<!-- ===================== TELA DE LOGIN ===================== -->
+<div id="login-screen">
+  <div class="login-bg"></div>
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 22V12h6v10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="login-brand">HVAC Pro</div>
+        <div class="login-brand-sub">Sistema de Gestão</div>
+      </div>
+    </div>
+
+    <h1 class="login-title">Bem-vindo</h1>
+    <p class="login-sub">Entre com suas credenciais para acessar o sistema.</p>
+
+    <div id="login-error" class="login-error" style="display:none">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Usuário ou senha incorretos.
+    </div>
+
+    <div class="login-form">
+      <div class="login-field">
+        <label>Usuário</label>
+        <div class="login-input-wrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20a8 8 0 0116 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input type="text" id="login-user" placeholder="ex: admin" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('login-pass').focus()">
+        </div>
+      </div>
+      <div class="login-field">
+        <label>Senha</label>
+        <div class="login-input-wrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+          <button class="login-eye" onclick="toggleLoginPass(this)" tabindex="-1" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+        </div>
+      </div>
+      <button class="login-btn" onclick="doLogin()">
+        Entrar
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="login-users-hint">
+      <div class="login-hint-title">Contas de demonstração</div>
+      <div class="login-hint-row"><span class="login-hint-badge admin">Admin</span><span>admin / admin123</span></div>
+      <div class="login-hint-row"><span class="login-hint-badge tech">Técnico</span><span>tecnico / tec123</span></div>
+    </div>
+  </div>
+</div>
+
+
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <div class="logo">
@@ -75,6 +133,12 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="10 9 9 9 8 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       <span>Ordens de Serviço</span>
     </a>
+
+    <div class="nav-section-label nav-admin-only">Administração</div>
+    <a class="nav-link nav-admin-only" onclick="showPage('usuarios')" data-page="usuarios">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>Usuários</span>
+    </a>
   </nav>
 
   <div class="sidebar-footer">
@@ -89,12 +153,18 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       </button>
     </div>
-    <div class="sidebar-user">
-      <div class="user-avatar">GE</div>
-      <div class="user-info">
-        <div class="user-name">Gestor</div>
-        <div class="user-role">Administrador</div>
+    <div class="sidebar-user sidebar-user-logout">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+        <div class="user-avatar">AD</div>
+        <div class="user-info" style="min-width:0">
+          <div class="user-name">Administrador</div>
+          <div class="user-role">Admin</div>
+        </div>
       </div>
+      <button class="logout-btn" onclick="doLogout()" title="Sair do sistema">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polyline points="16 17 21 12 16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Sair
+      </button>
     </div>
   </div>
 </aside>
@@ -373,9 +443,9 @@
             <button class="btn btn-outline" onclick="exportData('alocacoes','xlsx')">Excel</button>
             <button class="btn btn-outline" onclick="exportData('alocacoes','pdf')">PDF</button>
           </div>
-          <button class="btn btn-primary" onclick="openModal('modal-alocacao')">
+          <button class="btn btn-primary" onclick="showPage('clientes')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
-            Nova alocação
+            Alocar via Clientes
           </button>
         </div>
       </div>
@@ -525,16 +595,16 @@
             </div>
           </div>
 
-          <!-- EQUIPAMENTOS -->
+          <!-- EQUIPAMENTOS / MÁQUINAS -->
           <div class="os-section">
             <div class="os-section-title">EQUIPAMENTOS / MÁQUINAS</div>
             <table class="os-table">
               <thead><tr>
                 <th style="width:28px">#</th>
-                <th>Modelo / Marca</th>
-                <th style="width:150px">Nº Série</th>
-                <th style="width:100px">Tipo</th>
-                <th style="width:130px">Localização</th>
+                <th style="min-width:220px">Equipamento (do cadastro)</th>
+                <th style="width:140px">Nº Série</th>
+                <th style="width:110px">Tipo de serviço</th>
+                <th style="width:120px">Localização</th>
                 <th>Obs.</th>
                 <th style="width:28px" class="no-print"></th>
               </tr></thead>
@@ -611,10 +681,207 @@
       </div>
     </div>
 
+    <!-- ==================== USUÁRIOS ==================== -->
+    <div id="page-usuarios" class="page">
+      <div class="page-hero">
+        <div>
+          <h1 class="page-title">Gestão de Usuários</h1>
+          <p class="page-sub" id="usuariosCount"></p>
+        </div>
+        <div class="hero-actions">
+          <button class="btn btn-primary" onclick="openModalNovoUsuario()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+            Novo usuário
+          </button>
+        </div>
+      </div>
+
+      <!-- Cards de resumo -->
+      <div class="metrics" style="grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:1.25rem" id="usuarios-kpis"></div>
+
+      <!-- Filtros -->
+      <div class="filter-bar">
+        <input class="filter-input" type="text" placeholder="Buscar por nome, usuário ou perfil..." oninput="renderUsuarios()">
+        <select class="filter-select" onchange="renderUsuarios()">
+          <option value="">Todos os perfis</option>
+          <option value="Admin">Admin</option>
+          <option value="Gestor">Gestor</option>
+          <option value="Técnico">Técnico</option>
+          <option value="Visualizador">Visualizador</option>
+        </select>
+        <select class="filter-select" onchange="renderUsuarios()">
+          <option value="">Todos os status</option>
+          <option value="Ativo">Ativo</option>
+          <option value="Inativo">Inativo</option>
+        </select>
+      </div>
+
+      <div class="card table-card">
+        <table class="data-table" id="tbl-usuarios">
+          <thead><tr>
+            <th>Usuário</th>
+            <th>Login</th>
+            <th>Perfil</th>
+            <th>E-mail</th>
+            <th>Último acesso</th>
+            <th>Status</th>
+            <th class="actions-col">Ações</th>
+          </tr></thead>
+          <tbody id="tbody-usuarios"></tbody>
+        </table>
+        <div class="table-empty" id="empty-usuarios" style="display:none">Nenhum usuário encontrado.</div>
+      </div>
+    </div>
+
+
   </main>
 </div>
 
 <!-- ===================== MODAIS ===================== -->
+<!-- MODAL USUÁRIO -->
+<div class="modal-overlay" id="modal-usuario" onclick="overlayClose(event,'modal-usuario')">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h2 id="modal-usuario-title">Novo Usuário</h2>
+      <button class="modal-close" onclick="closeModal('modal-usuario')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="usr-id">
+
+      <div class="usr-avatar-row">
+        <div class="usr-avatar-preview" id="usr-avatar-preview">AD</div>
+        <div style="flex:1">
+          <div class="form-row" style="margin-bottom:0">
+            <div class="form-group">
+              <label>Nome completo *</label>
+              <input type="text" id="usr-nome" placeholder="Nome do utilizador" oninput="atualizarPreviewAvatar()">
+            </div>
+            <div class="form-group">
+              <label>Login (usuário) *</label>
+              <input type="text" id="usr-login" placeholder="ex: joao.silva" autocomplete="off">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top:14px">
+        <div class="form-group">
+          <label>Perfil de acesso *</label>
+          <select id="usr-perfil">
+            <option value="Admin">Admin — acesso total</option>
+            <option value="Gestor">Gestor — sem gestão de usuários</option>
+            <option value="Técnico">Técnico — acesso operacional</option>
+            <option value="Visualizador">Visualizador — somente leitura</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>E-mail</label>
+          <input type="email" id="usr-email" placeholder="email@empresa.com">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Telefone</label>
+          <input type="text" id="usr-tel" placeholder="(11) 00000-0000">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="usr-status">
+            <option value="Ativo">Ativo</option>
+            <option value="Inativo">Inativo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-divider">
+        <span>Senha</span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label id="usr-senha-label">Senha *</label>
+          <div class="pwd-wrap">
+            <input type="password" id="usr-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+            <button type="button" class="pwd-eye" onclick="togglePwd('usr-senha',this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Confirmar senha *</label>
+          <div class="pwd-wrap">
+            <input type="password" id="usr-senha2" placeholder="Repita a senha" autocomplete="new-password">
+            <button type="button" class="pwd-eye" onclick="togglePwd('usr-senha2',this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="usr-pwd-match" style="font-size:12px;margin-top:-8px;display:none"></div>
+
+      <!-- Permissões por módulo -->
+      <div class="form-divider"><span>Permissões de acesso</span></div>
+      <div class="perm-grid" id="perm-grid"></div>
+
+      <div class="form-row" style="margin-top:14px">
+        <div class="form-group full">
+          <label>Observações</label>
+          <input type="text" id="usr-obs" placeholder="Notas internas sobre este utilizador">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-usuario')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarUsuario()">Salvar usuário</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TROCAR SENHA -->
+<div class="modal-overlay" id="modal-trocar-senha" onclick="overlayClose(event,'modal-trocar-senha')">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2>Trocar senha</h2>
+      <button class="modal-close" onclick="closeModal('modal-trocar-senha')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="troca-usr-id">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">
+        Definindo nova senha para: <strong id="troca-usr-nome"></strong>
+      </p>
+      <div class="form-group" style="margin-bottom:12px">
+        <label>Nova senha *</label>
+        <div class="pwd-wrap">
+          <input type="password" id="troca-senha1" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          <button type="button" class="pwd-eye" onclick="togglePwd('troca-senha1',this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Confirmar nova senha *</label>
+        <div class="pwd-wrap">
+          <input type="password" id="troca-senha2" placeholder="Repita a senha" autocomplete="new-password">
+          <button type="button" class="pwd-eye" onclick="togglePwd('troca-senha2',this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+        </div>
+      </div>
+      <div id="troca-match" style="font-size:12px;margin-top:6px;display:none"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-trocar-senha')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarTrocaSenha()">Salvar senha</button>
+    </div>
+  </div>
+</div>
+
+
 
 <!-- MODAL MATERIAL -->
 <div class="modal-overlay" id="modal-material" onclick="overlayClose(event,'modal-material')">
@@ -823,12 +1090,9 @@
       <div class="form-row">
         <div class="form-group full"><label>Endereço *</label><input type="text" id="cli-end" placeholder="Rua, número, bairro, cidade - UF"></div>
       </div>
-      <div class="section-divider">Equipamentos instalados</div>
-      <div id="cli-equip-list"></div>
-      <button class="btn btn-ghost btn-sm" onclick="addClienteEquip()" style="margin-top:8px">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
-        Adicionar equipamento
-      </button>
+      <div class="section-divider" style="color:var(--text-muted);font-size:11px;border-top:1px solid var(--border);padding-top:10px;margin-top:4px">
+        Equipamentos instalados são gerenciados via botão "Alocar equipamento" na lista de clientes.
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-cliente')">Cancelar</button>

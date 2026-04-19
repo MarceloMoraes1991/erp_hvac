@@ -972,3 +972,275 @@ textarea.os-input:focus { border-color: var(--accent); background: var(--accent-
 .equip-cli-nome { font-size: 14px; font-weight: 600; color: var(--text); }
 .equip-cli-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; line-height: 1.5; }
 .equip-cli-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+/* ============================================================
+   TELA DE LOGIN
+   ============================================================ */
+#login-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg);
+}
+#login-screen.hidden { display: none; }
+
+.login-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--accent-light) 0%, var(--bg) 60%);
+  opacity: 0.6;
+}
+
+.login-card {
+  position: relative; z-index: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2.5rem 2.25rem;
+  width: 100%; max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.08);
+  animation: loginIn 350ms cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes loginIn {
+  from { opacity:0; transform: translateY(20px) scale(0.97); }
+  to   { opacity:1; transform: none; }
+}
+
+.login-logo {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 2rem;
+}
+.login-logo-icon {
+  width: 48px; height: 48px;
+  background: var(--accent);
+  border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(26,86,219,0.35);
+}
+.login-brand     { font-size: 20px; font-weight: 700; color: var(--text); }
+.login-brand-sub { font-size: 12px; color: var(--text-muted); }
+
+.login-title { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.login-sub   { font-size: 13px; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+.login-error {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--danger-bg); color: var(--danger);
+  border: 1px solid; border-color: color-mix(in srgb, var(--danger) 30%, transparent);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px; font-size: 13px; font-weight: 500;
+  margin-bottom: 1rem;
+  animation: shake 300ms ease;
+}
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 60%{transform:translateX(6px)}
+}
+
+.login-form   { display: flex; flex-direction: column; gap: 14px; }
+.login-field  { display: flex; flex-direction: column; gap: 6px; }
+.login-field label {
+  font-size: 12px; font-weight: 600;
+  color: var(--text-muted); letter-spacing: 0.02em;
+}
+.login-input-wrap {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.login-input-wrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
+}
+.login-input-wrap > svg { color: var(--text-subtle); flex-shrink: 0; }
+.login-input-wrap input {
+  flex: 1; border: none; background: none;
+  padding: 11px 0;
+  font-size: 14px; font-family: var(--font); color: var(--text);
+  outline: none;
+}
+.login-input-wrap input::placeholder { color: var(--text-subtle); }
+
+.login-eye {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); padding: 4px;
+  display: flex; align-items: center;
+  border-radius: 4px;
+  transition: color 150ms;
+}
+.login-eye:hover { color: var(--text); }
+
+.login-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  padding: 12px; font-size: 14px; font-weight: 600;
+  font-family: var(--font); cursor: pointer;
+  margin-top: 4px;
+  transition: background 150ms, transform 100ms, box-shadow 150ms;
+  box-shadow: 0 2px 8px rgba(26,86,219,0.3);
+}
+.login-btn:hover  { background: var(--accent-hover); box-shadow: 0 4px 14px rgba(26,86,219,0.4); }
+.login-btn:active { transform: scale(0.98); }
+.login-btn.loading { opacity: 0.7; pointer-events: none; }
+
+.login-users-hint {
+  margin-top: 1.5rem;
+  padding: 12px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px; color: var(--text-muted);
+}
+.login-hint-title {
+  font-weight: 600; color: var(--text-subtle);
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em;
+  margin-bottom: 8px;
+}
+.login-hint-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 5px; font-family: var(--font-mono); font-size: 12px;
+}
+.login-hint-row:last-child { margin-bottom: 0; }
+.login-hint-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 100px;
+  font-size: 10px; font-weight: 600; font-family: var(--font);
+  flex-shrink: 0;
+}
+.login-hint-badge.admin { background: var(--accent-light); color: var(--accent-text); }
+.login-hint-badge.tech  { background: var(--success-bg);  color: var(--success); }
+
+/* User info no sidebar — mostrar nome logado */
+.sidebar-user-logout {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+}
+.logout-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-subtle); padding: 4px 6px;
+  border-radius: var(--radius-sm); font-size: 11px;
+  display: flex; align-items: center; gap: 4px;
+  transition: all 150ms; white-space: nowrap;
+  font-family: var(--font);
+}
+.logout-btn:hover { background: var(--danger-bg); color: var(--danger); }
+
+/* ============================================================
+   GESTÃO DE USUÁRIOS
+   ============================================================ */
+
+/* Nav admin only — hidden until admin logs in */
+.nav-admin-only { display: none; }
+
+/* Avatar preview no modal */
+.usr-avatar-row {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 4px;
+}
+.usr-avatar-preview {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--accent-light);
+  color: var(--accent-text);
+  font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; letter-spacing: 0.05em;
+  border: 2px solid var(--accent);
+}
+
+/* Divisor de seção dentro do modal */
+.form-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 16px 0 14px;
+}
+.form-divider span {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text-muted); white-space: nowrap;
+}
+.form-divider::before, .form-divider::after {
+  content: ''; flex: 1; height: 1px;
+  background: var(--border);
+}
+
+/* Campo de senha com olho */
+.pwd-wrap {
+  display: flex; align-items: center;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: border-color var(--transition);
+}
+.pwd-wrap:focus-within { border-color: var(--accent); background: var(--surface); }
+.pwd-wrap input {
+  flex: 1; border: none; background: none;
+  padding: 8px 12px;
+  font-size: 13px; font-family: var(--font); color: var(--text);
+  outline: none;
+}
+.pwd-wrap input::placeholder { color: var(--text-subtle); }
+.pwd-eye {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); padding: 0 10px;
+  display: flex; align-items: center;
+  transition: color var(--transition);
+}
+.pwd-eye:hover { color: var(--text); }
+
+/* Permissões grid */
+.perm-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.perm-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: 12px; color: var(--text-muted);
+  user-select: none;
+}
+.perm-item:hover { background: var(--surface2); border-color: var(--accent); color: var(--text); }
+.perm-item.active {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+.perm-check {
+  width: 16px; height: 16px; border-radius: 4px;
+  border: 1.5px solid var(--border-strong);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all var(--transition);
+}
+.perm-item.active .perm-check {
+  background: var(--accent); border-color: var(--accent); color: #fff;
+}
+
+/* Badge de status usuário */
+.badge-ativo   { background: var(--success-bg); color: var(--success); }
+.badge-inativo { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+
+/* Badge de perfil */
+.perfil-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 100px;
+  font-size: 11.5px; font-weight: 600; white-space: nowrap;
+}
+.perfil-admin     { background: #EDE9FE; color: #5B21B6; }
+.perfil-gestor    { background: var(--info-bg); color: var(--info); }
+.perfil-tecnico   { background: var(--success-bg); color: var(--success); }
+.perfil-visualizador { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+
+/* Métricas de usuários */
+.metrics {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+}
+
+/* Row desativado na tabela */
+tr.row-inativo td { opacity: 0.5; }
